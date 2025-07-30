@@ -217,7 +217,7 @@ workflow.add_edge("transform_query", "retrieve")  # 查询优化后重新检索
 # 编译工作流
 graph = workflow.compile()
 
-draw_graph(graph, '../graph_rag.png')
+# draw_graph(graph, '../graph_rag.png')
 
 # 执行工作流
 
