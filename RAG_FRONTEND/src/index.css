@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 浅色模式默认样式 */
+body {
+  @apply bg-white text-gray-900;
+}
+
+/* 深色模式支持（可通过 html 上加类名 'dark' 激活） */
+html.dark body {
+  @apply bg-gray-900 text-white;
+}

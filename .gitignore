@@ -1,0 +1,20 @@
+# Python backend
+__pycache__/
+*.py[cod]
+*.db
+.env
+venv/
+logs/
+papers/
+chat_sessions.db
+
+# Node frontend
+node_modules/
+dist/
+.vite/
+*.log
+
+# OS / Editor junk
+.DS_Store
+.vscode/
+.idea/
