@@ -1,17 +1,18 @@
 // src/App.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 import ChatSidebar from "./components/ChatSidebar.jsx";
 import ChatWindow from "./components/ChatWindow.jsx";
 import { apiFetch } from "./utils/api.js";
 
 export default function App() {
-  const [chats, setChats] = useState([]);      // { id, title, messages }
+  const [chats, setChats] = useState([]);
   const [currentIdx, setCurrentIdx] = useState(null);
   const [loadingList, setLoadingList] = useState(true);
-  const [loadingMap, setLoadingMap] = useState({}); // { [chatId]: boolean }
+  const [loadingMap, setLoadingMap] = useState({});
+  const activeSessionId = useRef(null); // 👈 保留当前激活聊天 ID
 
-  // 初次加载：拿列表
+  // 初次加载聊天列表
   useEffect(() => {
     apiFetch("chat/list")
       .then((res) => res.json())
@@ -27,10 +28,12 @@ export default function App() {
       .finally(() => setLoadingList(false));
   }, []);
 
-  // 点击侧边栏：加载完整历史
+  // 选择聊天，加载历史记录
   const handleSelect = (idx) => {
     const chatId = chats[idx]?.id;
     if (!chatId) return;
+    activeSessionId.current = chatId; // 👈 更新激活会话 ID
+
     apiFetch(`chat/${chatId}`)
       .then((res) => res.json())
       .then((data) => {
@@ -39,52 +42,51 @@ export default function App() {
           text: m.content,
         }));
         const firstUser = data.chat_history.find((m) => m.type === "user");
-        const title = firstUser
-          ? firstUser.content.slice(0, 20)
-          : chats[idx].title;
+        const title = firstUser ? firstUser.content.slice(0, 20) : chats[idx].title;
+
         setChats((prev) => {
-          const nxt = [...prev];
-          nxt[idx] = { id: chatId, title, messages };
-          return nxt;
+          const newChats = [...prev];
+          newChats[idx] = { id: chatId, title, messages };
+          return newChats;
         });
         setCurrentIdx(idx);
       })
       .catch((e) => console.error("加载聊天历史失败", e));
   };
 
-  // ========= 重写 onSend，杜绝重复 =========
   const onSend = async (text) => {
     if (!text.trim()) return;
 
-    // 1) 确定聊天索引和 ID，本地构造 updatedChats
     let idx = currentIdx;
     let updatedChats = [...chats];
+    let newId = null;
 
     if (idx === null) {
-      const newId = uuidv4();
+      newId = uuidv4();
       idx = updatedChats.length;
-      updatedChats.push({
-        id: newId,
-        title: text.slice(0, 20),
-        messages: [],
-      });
+      updatedChats.push({ id: newId, title: text.slice(0, 20), messages: [] });
+      setChats(updatedChats);
       setCurrentIdx(idx);
     }
 
     const chatId = updatedChats[idx].id;
-    // 防抖：如果正在加载，不重复
+    activeSessionId.current = chatId; // 👈 更新激活会话 ID
+
     if (loadingMap[chatId]) return;
+
     setLoadingMap((m) => ({ ...m, [chatId]: true }));
 
-    // 2) 本地追加用户消息和 loading 提示
-    updatedChats[idx].messages = [
-      ...(updatedChats[idx].messages || []),
-      { from: "user", text },
-      { from: "assistant", text: "助手正在思考..." },
-    ];
-    setChats(updatedChats);
+    // 先显示用户输入与 loading 状态
+    setChats((prev) => {
+      const newChats = [...prev];
+      newChats[idx].messages = [
+        ...(newChats[idx].messages || []),
+        { from: "user", text },
+        { from: "assistant", text: "助手正在思考..." },
+      ];
+      return newChats;
+    });
 
-    // 3) 发请求
     try {
       const res = await apiFetch("chat/send", {
         method: "POST",
@@ -95,39 +97,59 @@ export default function App() {
       if (res.status === 429) {
         const err = await res.json();
         alert(err.error);
-        // 保留用户消息，移除 loading
-        updatedChats[idx].messages = updatedChats[idx].messages.filter(
-          (m) => m.text !== "助手正在思考..."
-        );
-        setChats([...updatedChats]);
+        setChats((prev) => {
+          const newChats = [...prev];
+          newChats[idx].messages = newChats[idx].messages.filter(
+            (m) => m.text !== "助手正在思考..."
+          );
+          return newChats;
+        });
       } else if (!res.ok) {
         throw new Error(res.status);
       } else {
         const data = await res.json();
-        // 4) 替换 loading 为真实回复
-        updatedChats[idx].messages = updatedChats[idx].messages.filter(
-          (m) => m.text !== "助手正在思考..."
-        );
-        updatedChats[idx].messages.push({ from: "assistant", text: data.reply || "" });
-        setChats([...updatedChats]);
+        // ✅ 响应成功后立即更新对应聊天内容（根据 session_id 判断）
+        setChats((prev) => {
+          const newChats = [...prev];
+          const targetIdx = newChats.findIndex((c) => c.id === chatId);
+          if (targetIdx !== -1) {
+            newChats[targetIdx].messages = newChats[targetIdx].messages.filter(
+              (m) => m.text !== "助手正在思考..."
+            );
+            newChats[targetIdx].messages.push({
+              from: "assistant",
+              text: data.reply || "",
+            });
+          }
+          return newChats;
+        });
       }
     } catch (e) {
       console.error("发送失败", e);
-      // 出错时只移除 loading
-      updatedChats[idx].messages = updatedChats[idx].messages.filter(
-        (m) => m.text !== "助手正在思考..."
-      );
-      setChats([...updatedChats]);
+      setChats((prev) => {
+        const newChats = [...prev];
+        const targetIdx = newChats.findIndex((c) => c.id === chatId);
+        if (targetIdx !== -1) {
+          newChats[targetIdx].messages = newChats[targetIdx].messages.filter(
+            (m) => m.text !== "助手正在思考..."
+          );
+        }
+        return newChats;
+      });
     } finally {
       setLoadingMap((m) => ({ ...m, [chatId]: false }));
     }
   };
-  // ======== onSend end ========
 
-  const onNewChat = () => setCurrentIdx(null);
+  const onNewChat = () => {
+    setCurrentIdx(null);
+    activeSessionId.current = null;
+  };
+
   const onDeleteChat = async (idx) => {
     const chatId = chats[idx]?.id;
     if (!chatId) return;
+
     try {
       await apiFetch(`chat/${chatId}`, { method: "DELETE" });
       setChats((prev) => prev.filter((_, i) => i !== idx));
