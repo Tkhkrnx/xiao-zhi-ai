@@ -2,8 +2,9 @@ import sqlite3
 import time
 from flask import Flask, request, jsonify, g
 from graph2.graph_2 import graph  # 你的工作流graph对象
-
+from flask_cors import CORS
 app = Flask(__name__)
+CORS(app)
 DB_PATH = 'chat_sessions.db'
 
 def get_db():
