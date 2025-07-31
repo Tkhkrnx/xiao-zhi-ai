@@ -1,4 +1,3 @@
-// src/App.jsx
 import React, { useState, useEffect, useRef } from "react";
 import { v4 as uuidv4 } from "uuid";
 import ChatSidebar from "./components/ChatSidebar.jsx";
@@ -10,9 +9,8 @@ export default function App() {
   const [currentIdx, setCurrentIdx] = useState(null);
   const [loadingList, setLoadingList] = useState(true);
   const [loadingMap, setLoadingMap] = useState({});
-  const activeSessionId = useRef(null); // 👈 保留当前激活聊天 ID
+  const activeSessionId = useRef(null);
 
-  // 初次加载聊天列表
   useEffect(() => {
     apiFetch("chat/list")
       .then((res) => res.json())
@@ -28,11 +26,10 @@ export default function App() {
       .finally(() => setLoadingList(false));
   }, []);
 
-  // 选择聊天，加载历史记录
   const handleSelect = (idx) => {
     const chatId = chats[idx]?.id;
     if (!chatId) return;
-    activeSessionId.current = chatId; // 👈 更新激活会话 ID
+    activeSessionId.current = chatId;
 
     apiFetch(`chat/${chatId}`)
       .then((res) => res.json())
@@ -41,6 +38,12 @@ export default function App() {
           from: m.type === "user" ? "user" : "assistant",
           text: m.content,
         }));
+
+        // 如果当前会话正在 loading，则添加“助手正在思考...”
+        if (loadingMap[chatId]) {
+          messages.push({ from: "assistant", text: "助手正在思考..." });
+        }
+
         const firstUser = data.chat_history.find((m) => m.type === "user");
         const title = firstUser ? firstUser.content.slice(0, 20) : chats[idx].title;
 
@@ -49,6 +52,7 @@ export default function App() {
           newChats[idx] = { id: chatId, title, messages };
           return newChats;
         });
+
         setCurrentIdx(idx);
       })
       .catch((e) => console.error("加载聊天历史失败", e));
@@ -70,13 +74,12 @@ export default function App() {
     }
 
     const chatId = updatedChats[idx].id;
-    activeSessionId.current = chatId; // 👈 更新激活会话 ID
+    activeSessionId.current = chatId;
 
     if (loadingMap[chatId]) return;
 
     setLoadingMap((m) => ({ ...m, [chatId]: true }));
 
-    // 先显示用户输入与 loading 状态
     setChats((prev) => {
       const newChats = [...prev];
       newChats[idx].messages = [
@@ -108,7 +111,6 @@ export default function App() {
         throw new Error(res.status);
       } else {
         const data = await res.json();
-        // ✅ 响应成功后立即更新对应聊天内容（根据 session_id 判断）
         setChats((prev) => {
           const newChats = [...prev];
           const targetIdx = newChats.findIndex((c) => c.id === chatId);
