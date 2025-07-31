@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { v4 as uuidv4 } from "uuid";
 import ChatSidebar from "./components/ChatSidebar.jsx";
 import ChatWindow from "./components/ChatWindow.jsx";
+import { apiFetch } from "./utils/api.js";
 
 export default function App() {
   const [chats, setChats] = useState([]);      // { id, title, messages }
@@ -12,7 +13,7 @@ export default function App() {
 
   // 初次加载：拿列表
   useEffect(() => {
-    fetch("/api/chat/list")
+    apiFetch("chat/list")
       .then((res) => res.json())
       .then((data) => {
         const formatted = data.map((item) => ({
@@ -30,7 +31,7 @@ export default function App() {
   const handleSelect = (idx) => {
     const chatId = chats[idx]?.id;
     if (!chatId) return;
-    fetch(`/api/chat/${chatId}`)
+    apiFetch(`chat/${chatId}`)
       .then((res) => res.json())
       .then((data) => {
         const messages = data.chat_history.map((m) => ({
@@ -85,7 +86,7 @@ export default function App() {
 
     // 3) 发请求
     try {
-      const res = await fetch("/api/chat/send", {
+      const res = await apiFetch("chat/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ session_id: chatId, question: text }),
@@ -128,7 +129,7 @@ export default function App() {
     const chatId = chats[idx]?.id;
     if (!chatId) return;
     try {
-      await fetch(`/api/chat/${chatId}`, { method: "DELETE" });
+      await apiFetch(`chat/${chatId}`, { method: "DELETE" });
       setChats((prev) => prev.filter((_, i) => i !== idx));
       if (currentIdx === idx) setCurrentIdx(null);
       else if (currentIdx > idx) setCurrentIdx((c) => c - 1);
