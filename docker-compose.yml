@@ -4,23 +4,9 @@ networks:
   rag-net:
     driver: bridge
 
-volumes:
-  frontend_build:
-
 services:
-  # 1) 前端：构建并把 dist 输出到共享卷
-  frontend_rag_frontend:
-    build:
-      context: ./RAG_FRONTEND
-      dockerfile: Dockerfile
-    command: sh -c "npm install && npm run build"
-    volumes:
-      - frontend_build:/usr/share/nginx/html/xiao-zhi-ai
-    networks:
-      - rag-net
-
-  # 2) 后端：Flask 服务
-  backend_rag_project:
+  # 后端 Flask 服务
+  backend_xiao_zhi_ai:
     build:
       context: ./RAG_PROJECT
       dockerfile: Dockerfile
@@ -29,18 +15,15 @@ services:
     networks:
       - rag-net
 
-  # 3) Nginx：使用官方 nginx.conf + 我们的站点配置
+  # Nginx 反向代理，挂载前端静态资源和 nginx 配置
   nginx_xiao_zhi_ai:
-    image: nginx:latest
+    image: nginx:stable-alpine
     ports:
       - "80:80"
     volumes:
-      # 加载我们刚才放到 conf.d 下的站点配置
-      - ./nginx/conf.d/xiao-zhi-ai.conf:/etc/nginx/conf.d/xiao-zhi-ai.conf:ro
-      # 挂载前端 build 输出
-      - frontend_build:/usr/share/nginx/html/xiao-zhi-ai:ro
+      - ./nginx/conf.d/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./RAG_FRONTEND/dist:/usr/share/nginx/html/xiao-zhi-ai:ro
     depends_on:
-      - frontend_rag_frontend
-      - backend_rag_project
+      - backend_xiao_zhi_ai
     networks:
       - rag-net
