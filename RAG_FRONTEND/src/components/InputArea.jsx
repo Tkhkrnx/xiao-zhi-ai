@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import sendIcon from "/send.svg";
 
 export default function InputArea({ onSend, isNew }) {
   const [text, setText] = useState("");
@@ -71,7 +72,7 @@ export default function InputArea({ onSend, isNew }) {
             bottom: "16px",  // 与 paddingBottom 一致
           }}
         >
-          <img src="/send.svg" alt="发送" className="w-4 h-4 invert" />
+          <img src={sendIcon} alt="发送" className="w-4 h-4 invert" />
         </button>
       </div>
     </div>
