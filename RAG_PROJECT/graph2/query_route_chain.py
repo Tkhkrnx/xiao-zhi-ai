@@ -36,14 +36,14 @@ system = """
 
 决策规则：
   1. 如果问题中出现"今天"、"现在"、"实时"、"新闻"、"天气"、"股市"、"汇率"等词，应路由到 web_search。
-  2. 如果问题询问技术细节、算法原理、模型架构、学术研究（如深度学习、注意力机制、Transformer、RAG、强化学习、图神经网络等），且不涉及具体代码实现，应路由到 vectorstore。
-  3. 如果问题涉及编程代码、代码实现、代码示例、编程语法、框架使用（如Python、TensorFlow、PyTorch、LangChain等代码），应路由到 llm_direct。
-  4. 如果问题明确询问某篇论文中的具体代码实现、算法伪代码或可重现的实验代码，应路由到 vectorstore。
+  2. 如果问题明确询问某篇论文中的思想、理论、算法原理或概念（如"论文中提出的注意力机制原理是什么"），应路由到 vectorstore。
+  3. 如果问题涉及任何编程代码、代码实现、代码示例、编程语法、框架使用（如Python、TensorFlow、PyTorch、LangChain等代码），应路由到 llm_direct。
+  4. 如果问题涉及技术概念、算法原理、模型架构等学术内容（但不涉及代码），应路由到 vectorstore。
   5. 其它情况（例如日常问答、闲聊、常识性问题等），应路由到 llm_direct。
 
 关键词判断：
-  - 路由到 llm_direct 的代码相关关键词：代码、编程、实现、示例、怎么写、如何写、syntax、code、program、script、函数、类、方法、库、框架
-  - 路由到 vectorstore 的学术代码关键词：论文代码、算法伪代码、实验代码、可重现代码、reference code
+  - 路由到 llm_direct 的关键词：代码、编程、实现、示例、怎么写、如何写、syntax、code、program、script、函数、类、方法、库、框架、伪代码
+  - 路由到 vectorstore 的关键词：原理、理论、思想、机制、架构、论文、研究、学术
 
 请结合最近 3 条对话历史 `{history}`（如果没有可写"无"）和当前问题 `{question}`，输出 [datasource](file://C:\Users\peng\Desktop\RAG\RAG_PROJECT\graph2\query_route_chain.py#L10-L13) 
 
