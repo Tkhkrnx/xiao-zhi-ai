@@ -13,5 +13,4 @@ FROM nginx:stable-alpine
 # 复制构建好的静态资源到 nginx 默认路径
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# 直接启动 nginx
 CMD ["nginx", "-g", "daemon off;"]
