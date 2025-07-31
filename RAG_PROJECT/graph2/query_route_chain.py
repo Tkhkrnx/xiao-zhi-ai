@@ -35,11 +35,17 @@ system = """
   • llm_direct：当上述两者都不合适、且属于一般性咨询或闲聊时，让 LLM 自行回答  
 
 决策规则：
-  1. 如果问题中出现“今天”、“现在”、“实时”、“新闻”、“天气”、“股市”、“汇率”等词，应路由到 web_search。  
-  2. 如果问题询问技术细节、算法原理、模型架构、学术研究（如深度学习、注意力机制、Transformer、RAG、强化学习、图神经网络等），应路由到 vectorstore。  
-  3. 其它情况（例如日常问答、闲聊、常识性问题等），应路由到 llm_direct。  
+  1. 如果问题中出现"今天"、"现在"、"实时"、"新闻"、"天气"、"股市"、"汇率"等词，应路由到 web_search。
+  2. 如果问题询问技术细节、算法原理、模型架构、学术研究（如深度学习、注意力机制、Transformer、RAG、强化学习、图神经网络等），且不涉及具体代码实现，应路由到 vectorstore。
+  3. 如果问题涉及编程代码、代码实现、代码示例、编程语法、框架使用（如Python、TensorFlow、PyTorch、LangChain等代码），应路由到 llm_direct。
+  4. 如果问题明确询问某篇论文中的具体代码实现、算法伪代码或可重现的实验代码，应路由到 vectorstore。
+  5. 其它情况（例如日常问答、闲聊、常识性问题等），应路由到 llm_direct。
 
-请结合最近 3 条对话历史 `{history}`（如果没有可写“无”）和当前问题 `{question}`，输出 `datasource` 
+关键词判断：
+  - 路由到 llm_direct 的代码相关关键词：代码、编程、实现、示例、怎么写、如何写、syntax、code、program、script、函数、类、方法、库、框架
+  - 路由到 vectorstore 的学术代码关键词：论文代码、算法伪代码、实验代码、可重现代码、reference code
+
+请结合最近 3 条对话历史 `{history}`（如果没有可写"无"）和当前问题 `{question}`，输出 [datasource](file://C:\Users\peng\Desktop\RAG\RAG_PROJECT\graph2\query_route_chain.py#L10-L13) 
 
 重要说明：
 - 必须使用 "datasource" 作为字段名
@@ -47,6 +53,7 @@ system = """
 - 必须返回严格的JSON格式
 - 不要包含任何解释或其他文本
 """
+
 route_prompt = ChatPromptTemplate.from_messages([
     ("system", system),
     ("human", "历史对话：\n{history}\n\n当前问题：\n{question}")

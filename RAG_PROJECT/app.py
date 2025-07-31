@@ -111,9 +111,6 @@ def api_chat_detail(chat_id):
 
 @app.route("/api/chat/send", methods=["POST"])
 def api_chat_send():
-    """
-    接收用户输入，执行 RAG 工作流，保存消息，并返回助手回复和最新历史
-    """
     data = request.json
     session_id = data.get("session_id", "default")
     question = data.get("question")
@@ -123,16 +120,33 @@ def api_chat_send():
     ensure_chat_exists(session_id)
     chat_history = load_chat_history(session_id)
 
+    # 保存用户消息
+    save_chat_message(session_id, "user", question)
+
+    # 保存“助手正在思考”占位消息
+    db = get_db()
+    c = db.cursor()
+    now = int(time.time())
+    c.execute(
+        'INSERT INTO messages (chat_id, type, content, created_at) VALUES (?, ?, ?, ?)',
+        (session_id, "assistant", "...", now)
+    )
+    placeholder_id = c.lastrowid
+    db.commit()
+
     # 执行工作流
     inputs = {"question": question, "chat_history": chat_history}
     final_state = None
     for output in graph.stream(inputs, {"recursion_limit": 50}):
         final_state = list(output.values())[-1]
 
-    # 保存用户和助手消息
-    save_chat_message(session_id, "user", question)
+    # 替换助手占位消息为真实回复
     if "generation" in final_state:
-        save_chat_message(session_id, "assistant", final_state["generation"])
+        c.execute(
+            'UPDATE messages SET content = ? WHERE id = ?',
+            (final_state["generation"], placeholder_id)
+        )
+        db.commit()
 
     new_history = load_chat_history(session_id)
     return jsonify({

@@ -12,6 +12,9 @@ export default function ChatWindow({ chat, onSend }) {
 
   const isNew = !chat || !chat.messages || chat.messages.length === 0;
 
+  const isThinkingMessage = (msg) =>
+    msg.from === "assistant" && msg.text?.trim() === "助手正在思考...";
+
   return (
     <div className="flex flex-col h-full bg-white dark:bg-gray-900">
       {isNew ? (
@@ -26,16 +29,17 @@ export default function ChatWindow({ chat, onSend }) {
           <div className="flex-grow overflow-y-auto px-4 py-6 space-y-4">
             {chat.messages.map((msg, i) => {
               if (msg.from === "assistant") {
-                if (msg.text === "助手正在思考...") {
+                if (isThinkingMessage(msg)) {
                   return (
                     <p
                       key={i}
                       className="text-center italic text-gray-500 dark:text-gray-400 whitespace-pre-wrap"
                     >
-                      {msg.text}
+                      助手正在思考...
                     </p>
                   );
                 }
+
                 return (
                   <div
                     key={i}
