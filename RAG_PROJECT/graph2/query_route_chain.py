@@ -45,7 +45,7 @@ system = """
   - 路由到 llm_direct 的关键词：代码、编程、实现、示例、怎么写、如何写、syntax、code、program、script、函数、类、方法、库、框架、伪代码
   - 路由到 vectorstore 的关键词：原理、理论、思想、机制、架构、论文、研究、学术
 
-请结合最近 3 条对话历史 `{history}`（如果没有可写"无"）和当前问题 `{question}`，输出 [datasource](file://C:\Users\peng\Desktop\RAG\RAG_PROJECT\graph2\query_route_chain.py#L10-L13) 
+请结合最近 3 条对话历史 `{history}`（如果没有可写"无"）和当前问题 `{question}`，输出 [datasource] 
 
 重要说明：
 - 必须使用 "datasource" 作为字段名
