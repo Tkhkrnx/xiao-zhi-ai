@@ -9,7 +9,6 @@ export default function App() {
   const [currentIdx, setCurrentIdx] = useState(null);
   const [loadingList, setLoadingList] = useState(true);
   const [loadingMap, setLoadingMap] = useState({});
-  const [collapsed, setCollapsed] = useState(window.innerWidth < 768);
   const activeSessionId = useRef(null);
 
   useEffect(() => {
@@ -27,18 +26,6 @@ export default function App() {
       .finally(() => setLoadingList(false));
   }, []);
 
-  useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setCollapsed(true);
-      } else {
-        setCollapsed(false);
-      }
-    };
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   const handleSelect = (idx) => {
     const chatId = chats[idx]?.id;
     if (!chatId) return;
@@ -52,6 +39,7 @@ export default function App() {
           text: m.content,
         }));
 
+        // 如果当前会话正在 loading，则添加“助手正在思考...”
         if (loadingMap[chatId]) {
           messages.push({ from: "assistant", text: "助手正在思考..." });
         }
@@ -175,45 +163,23 @@ export default function App() {
   };
 
   if (loadingList) {
-    return (
-      <div className="flex items-center justify-center h-screen text-gray-500 dark:text-gray-400">
-        加载中...
-      </div>
-    );
+    return <div className="flex justify-center items-center h-screen">加载中...</div>;
   }
 
   return (
-    <div className="flex h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+    <div className="h-screen flex bg-white dark:bg-gray-900">
       <ChatSidebar
         chats={chats}
         onNewChat={onNewChat}
         onSelect={handleSelect}
         onDeleteChat={onDeleteChat}
         current={currentIdx}
-        collapsed={collapsed}
-        onCollapseChange={setCollapsed}
       />
-
-      <main
-        className={`flex-grow flex flex-col
-          transition-all duration-300
-          ${collapsed ? "w-[calc(100%-56px)] mx-auto" : "w-[calc(100%-256px)]"}`}
-        style={{ maxWidth: collapsed ? "calc(100% - 56px)" : "calc(100% - 256px)" }}
-      >
-        {currentIdx === null ? (
-          <div className="flex-grow flex items-center justify-center text-gray-500 dark:text-gray-400 px-4 text-center">
-            <p>
-              在下方输入你的问题，或点击左侧“新聊天”开始。
-            </p>
-          </div>
-        ) : (
-          <ChatWindow
-            chat={chats[currentIdx]}
-            onSend={onSend}
-            loading={loadingMap[chats[currentIdx].id]}
-          />
-        )}
-      </main>
+      <div className="flex-1 flex justify-center overflow-hidden">
+        <div className="w-full max-w-4xl flex flex-col">
+          <ChatWindow chat={currentIdx !== null ? chats[currentIdx] : null} onSend={onSend} />
+        </div>
+      </div>
     </div>
   );
 }
