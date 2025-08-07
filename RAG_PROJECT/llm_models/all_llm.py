@@ -5,7 +5,7 @@ from utils.env_utils import LLM_API_KEY, TAVILY_API_KEY
 
 llm = ChatOpenAI(
     temperature=0,
-    model='claude-3-5-haiku-20241022',  # 用不起sonnet...
+    model='claude-3-5-sonnet-20241022',  # 用不起sonnet...
     api_key=LLM_API_KEY,
     base_url="https://www.chataiapi.com/v1"
 )
