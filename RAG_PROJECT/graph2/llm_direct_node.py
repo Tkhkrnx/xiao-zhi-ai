@@ -30,7 +30,7 @@ def llm_direct(state: dict) -> dict:
         3. 回答要准确、简洁、直接
         4. 如果你不确定答案，诚实说明不知道
         5. 不要编造信息或进行推测
-        6. 仅输出有效的纯 JSON，不要包含任何 markdown 或代码块格式。
+        6. 你的回答不要包含任何 markdown 或代码块格式。
         问题：{question}
     
         回答：""",
