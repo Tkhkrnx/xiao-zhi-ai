@@ -31,7 +31,7 @@ def transform_query(state):
     - 不要添加解释或额外信息
     - 不要改变问题的根本意图
     - 使问题更适合在技术文档中检索答案
-    - 你的回答不要包含任何 markdown 或代码块格式
+    - 你的回答不能在外面包一个 markdown，因为 pydantic 需要解析纯JSON，但是内容可以有 markdown。
     示例：
     原始问题：GPT怎么工作的？
     优化问题：GPT语言模型的架构原理和工作机制是什么？"""

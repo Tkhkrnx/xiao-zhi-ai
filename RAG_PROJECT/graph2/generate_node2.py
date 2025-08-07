@@ -31,7 +31,7 @@ def generate(state):
         - 回答应简洁明了，直接针对问题核心
         - 将信息来源融入你的回答中，不要直接引用原文
         - 不要编造或推测未在参考内容中提及的信息
-        - 你的回答不要包含任何 markdown 或代码块格式。
+        - 你的回答不能在外面包一个 markdown，因为 pydantic 需要解析纯JSON，但是内容可以有 markdown
     
         对话历史：
         {chat_history}
