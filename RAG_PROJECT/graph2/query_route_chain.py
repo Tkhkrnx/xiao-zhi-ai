@@ -50,7 +50,7 @@ system = """
 重要说明：
 - 必须使用 "datasource" 作为字段名
 - 值只能是 "vectorstore", "web_search", "llm_direct"三者之一
-- 必须返回严格的JSON格式
+- 必须返回严格的JSON格式，不要包含任何 markdown 或代码块格式。
 - 不要包含任何解释或其他文本
 """
 
