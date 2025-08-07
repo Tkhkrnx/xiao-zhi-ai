@@ -12,7 +12,7 @@ class GraphState(TypedDict):
         generation: 语言模型生成的回答文本
         transform_count: 传换查询的次数
         documents: 检索到的相关文档列表
-        history: 存储历史记录
+        chat_history: 存储历史记录
     """
 
     question: str  # 存储当前处理的用户问题
@@ -21,4 +21,4 @@ class GraphState(TypedDict):
     web_search_count: int  # 搜索尝试次数
     generation: str  # 存储LLM生成的回答内容
     documents: List[Document]  # 存储检索到的文档内容列表
-    history: List[str]  # 存储历史记录
+    chat_history: List[str]  # 存储历史记录
