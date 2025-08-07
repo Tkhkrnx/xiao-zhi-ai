@@ -23,7 +23,7 @@ def web_search(state):
     chat_history = state.get("chat_history", [])  # 获取对话历史
 
     # 格式化对话历史
-    formatted_history = "\n".join([f"{msg.type}: {msg.content}" for msg in chat_history])
+    formatted_history = "\n".join([f"{msg['type']}: {msg['content']}" for msg in chat_history])
 
     # 使用LLM优化搜索查询，考虑对话历史
     search_prompt = PromptTemplate(
@@ -63,8 +63,8 @@ def web_search(state):
 
     # 更新对话历史，添加网络搜索结果
     updated_history = chat_history + [
-        HumanMessage(content=question),
-        AIMessage(content=f"通过网络搜索获取到以下信息:\n{web_results.page_content}")
+        {"type": "human", "content": question},
+        {"type": "ai", "content": f"通过网络搜索获取到以下信息:\n{web_results.page_content}"}
     ]
 
     return {"documents": web_results, "question": question, "web_search_count": web_search_count + 1,
