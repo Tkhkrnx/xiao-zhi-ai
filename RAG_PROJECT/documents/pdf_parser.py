@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.INFO)
 class PDFPageChunkParser:
 
     def __init__(self,
-                 embed_model_name: str = "intfloat/e5-large",
+                 embed_model_name: str = "bge-small-zh-v1.5",
                  chunk_size_thresh: int = 5000):
         # 嵌入模型
         self.embedding_model = HuggingFaceEmbeddings(
