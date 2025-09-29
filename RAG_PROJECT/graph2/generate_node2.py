@@ -66,8 +66,8 @@ def generate(state):
     generation = rag_chain.invoke({"context": format_docs(documents), "question": question, "chat_history": formatted_history})
     # 更新对话历史
     updated_history = chat_history + [
-        HumanMessage(content=question),
-        AIMessage(content=generation)
+        {"type": "user", "content": question},
+        {"type": "assistant", "content": generation}
     ]
     # 调用RAG链生成回答
     return {"documents": documents, "question": question, "generation": generation, "chat_history": updated_history, "generate_retry_count": generate_retry_count + 1}  # 返回更新后的状态
