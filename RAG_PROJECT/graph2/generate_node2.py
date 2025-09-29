@@ -54,7 +54,7 @@ def generate(state):
         else:
             return "\n\n" + docs.page_content
 
-    formatted_history = "\n".join(["{msg['type']}: {msg['content']}" for msg in chat_history])
+    formatted_history = "\n".join([f"{msg.type}: {msg.content}" for msg in chat_history])
     # 构建RAG处理链
     rag_chain = (
             prompt |  # 第一步：使用提示模板

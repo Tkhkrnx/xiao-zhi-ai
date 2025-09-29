@@ -38,7 +38,7 @@ def llm_direct(state: dict) -> dict:
     )
 
     # 格式化对话历史
-    formatted_history = "\n".join(["{msg['type']}: {msg['content']}" for msg in chat_history])
+    formatted_history = "\n".join([f"{msg.type}: {msg.content}" for msg in chat_history])
 
     llm_chain = (
             prompt |  # 第一步：使用提示模板

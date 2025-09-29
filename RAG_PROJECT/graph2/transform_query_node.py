@@ -54,7 +54,7 @@ def transform_query(state):
     )
 
     # 格式化对话历史
-    formatted_history = "\n".join(["{msg['type']}: {msg['content']}" for msg in chat_history])
+    formatted_history = "\n".join([f"{msg.type}: {msg.content}" for msg in chat_history])
     # 问题重写
     better_question = question_rewriter.invoke({
         "question": question,

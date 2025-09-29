@@ -133,7 +133,7 @@ def route_question(state):
     question = state["question"]  # 获取用户问题
     chat_history = state.get("chat_history", [])  # 获取对话历史
     # 格式化对话历史
-    formatted_history = "\n".join(["{msg['type']}: {msg['content']}" for msg in chat_history])
+    formatted_history = "\n".join([f"{msg.type}: {msg.content}" for msg in chat_history])
 
     # 调用问题路由器，提供所有需要的变量
     source = question_router_chain.invoke({
