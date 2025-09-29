@@ -38,7 +38,7 @@ def llm_direct(state: dict) -> dict:
     )
 
     # 格式化对话历史
-    formatted_history = "\n".join([f"{msg.type}: {msg.content}" for msg in chat_history])
+    formatted_history = "\n".join([f"{msg['type']}: {msg['content']}" for msg in chat_history])
 
     llm_chain = (
             prompt |  # 第一步：使用提示模板
@@ -50,7 +50,7 @@ def llm_direct(state: dict) -> dict:
     generation = llm_chain.invoke({"question": question, "chat_history": formatted_history})  # 调用llm链生成回答
     # 更新对话历史
     updated_history = chat_history + [
-        HumanMessage(content=question),
-        AIMessage(content=generation)
+        {"type": "user", "content": question},
+        {"type": "assistant", "content": generation}
     ]
     return {"question": question, "generation": generation, "chat_history": updated_history}  # 返回更新后的状态
