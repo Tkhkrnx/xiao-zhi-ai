@@ -63,8 +63,8 @@ def web_search(state):
 
     # 更新对话历史，添加网络搜索结果
     updated_history = chat_history + [
-        {"type": "human", "content": question},
-        {"type": "ai", "content": f"通过网络搜索获取到以下信息:\n{web_results.page_content}"}
+        HumanMessage(content=question),
+        AIMessage(content=f"通过网络搜索获取到以下信息:\n{web_results.page_content}")
     ]
 
     return {"documents": web_results, "question": question, "web_search_count": web_search_count + 1,
